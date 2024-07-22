@@ -12,6 +12,12 @@ form.post("/:id", (c) => {
 
 const app = new Hono();
 
+// middleware
+app.use(async (c, next) => {
+  console.log("inside middleware");
+  await next();
+});
+
 // step 2: connect the sub application with the main one
 app.route("/form", form);
 

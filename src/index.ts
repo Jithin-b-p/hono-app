@@ -1,6 +1,19 @@
 import { Hono } from "hono";
 
+// Grouping related routes
+// step 1: creating sub application
+const form = new Hono();
+
+form.get("/", (c) => c.text("form get route"));
+form.post("/:id", (c) => {
+  const { id } = c.req.param();
+  return c.text(id);
+});
+
 const app = new Hono();
+
+// step 2: connect the sub application with the main one
+app.route("/form", form);
 
 app.get("/welcome", (c) => {
   // return c.body("this is a text message", 200, {

@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { env } from "hono/adapter";
 
-const prisma = new PrismaClient().$extends(withAccelerate());
 // Grouping related routes
 // step 1: creating sub application
 const form = new Hono();
@@ -34,6 +33,10 @@ app.get("/welcome", (c) => {
 });
 
 app.post("/user/create", async (c) => {
+  const { DATABASE_URL } = env<{ DATABASE_URL: string }>(c);
+  const prisma = new PrismaClient({
+    datasourceUrl: DATABASE_URL,
+  }).$extends(withAccelerate());
   const { email, name } = await c.req.json();
 
   try {
@@ -46,6 +49,10 @@ app.post("/user/create", async (c) => {
 });
 
 app.get("/user", async (c) => {
+  const { DATABASE_URL } = env<{ DATABASE_URL: string }>(c);
+  const prisma = new PrismaClient({
+    datasourceUrl: DATABASE_URL,
+  }).$extends(withAccelerate());
   try {
     const users = await prisma.user.findMany({});
     console.log(users);

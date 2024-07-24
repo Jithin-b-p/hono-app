@@ -1,5 +1,9 @@
 import { Hono } from "hono";
+import { PrismaClient } from "@prisma/client/edge";
+import { withAccelerate } from "@prisma/extension-accelerate";
+import { env } from "hono/adapter";
 
+const prisma = new PrismaClient().$extends(withAccelerate());
 // Grouping related routes
 // step 1: creating sub application
 const form = new Hono();
@@ -29,10 +33,26 @@ app.get("/welcome", (c) => {
   return c.json({ message: "This is a json message" }, 200);
 });
 
-app.post("/user", async (c) => {
-  const { username, id } = await c.req.json();
+app.post("/user/create", async (c) => {
+  const { email, name } = await c.req.json();
 
-  return c.json({ username, id });
+  try {
+    await prisma.user.create({ data: { email, name } });
+    return c.json({ status: "successfully created" });
+  } catch (error) {
+    console.log(error);
+    return c.json({ status: "failed" });
+  }
+});
+
+app.get("/user", async (c) => {
+  try {
+    const users = await prisma.user.findMany({});
+    console.log(users);
+    return c.json({ status: "successful" });
+  } catch (error) {
+    return c.json({ status: "failed" });
+  }
 });
 
 export default app;
